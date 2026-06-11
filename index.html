@@ -210,10 +210,15 @@
 
     <div class="field">
       <label>Interaction Image <span class="req">*</span></label>
-      <div class="upload-zone" id="upload-zone">
-        <input type="file" id="field-image" accept="image/*" />
+      <div style="display:flex;gap:10px;margin-bottom:10px;">
+        <button type="button" onclick="document.getElementById('field-image-gallery').click()" style="flex:1;padding:11px;border:1.5px solid var(--line);border-radius:var(--radius);background:var(--white);color:var(--navy);font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">🖼️ Gallery</button>
+        <button type="button" onclick="document.getElementById('field-image-camera').click()" style="flex:1;padding:11px;border:1.5px solid var(--line);border-radius:var(--radius);background:var(--white);color:var(--navy);font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">📷 Camera</button>
+      </div>
+      <input type="file" id="field-image-gallery" accept="image/*" style="display:none;" />
+      <input type="file" id="field-image-camera" accept="image/*" capture="environment" style="display:none;" />
+      <div class="upload-zone" id="upload-zone" style="pointer-events:none;">
         <div class="upload-icon">📎</div>
-        <p><strong>Click to choose</strong> or drag & drop</p>
+        <p><strong>Choose from Gallery or take a Photo</strong></p>
         <p style="margin-top:4px;">JPG, PNG, WEBP — max 10 MB</p>
         <div id="file-name"></div>
       </div>
@@ -231,7 +236,7 @@
 
 <script>
 // ── CONFIG ─────────────────────────────────────────────────
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxFmldsb_OBcOWfMJAFJc4sz7OWGujfQtLLdO9kmu9WDAHwyjZ-_PHYvQ26yil6QWgu/exec";
+const GAS_URL = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";
 // ──────────────────────────────────────────────────────────
 
 let userEmail = "";
@@ -259,8 +264,7 @@ window.onload = () => {
 };
 
 // ── Image preview ─────────────────────────────────────────
-document.getElementById("field-image").addEventListener("change", function () {
-  const file = this.files[0];
+function handleImageSelect(file) {
   if (!file) return;
   document.getElementById("upload-zone").classList.add("has-file");
   const nameEl = document.getElementById("file-name");
@@ -273,14 +277,16 @@ document.getElementById("field-image").addEventListener("change", function () {
     img.style.display = "block";
   };
   reader.readAsDataURL(file);
-});
+}
+document.getElementById("field-image-gallery").addEventListener("change", function() { handleImageSelect(this.files[0]); });
+document.getElementById("field-image-camera").addEventListener("change",  function() { handleImageSelect(this.files[0]); });
 
 // ── Submit ────────────────────────────────────────────────
 async function submitForm() {
   const name    = document.getElementById("field-name").value.trim();
   const pan     = document.getElementById("field-pan").value.trim();
   const remarks = document.getElementById("field-remarks").value.trim();
-  const imageInput = document.getElementById("field-image");
+  const imageInput = document.getElementById("field-image-gallery").files.length ? document.getElementById("field-image-gallery") : document.getElementById("field-image-camera");
 
   if (!remarks)                 { showToast("Please enter RM's Remarks.", "error"); return; }
   if (!imageInput.files.length) { showToast("Please attach an image.", "error"); return; }
